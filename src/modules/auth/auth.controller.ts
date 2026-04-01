@@ -12,6 +12,7 @@ import { ResetPasswordDto } from './dto/resetPassword.dto';
 import { LoginDto } from './dto/login.dto';
 import { Verify2FADto } from './dto/verify-2fa.dto';
 import { GoogleAuthGuard } from './guards/google.guard';
+import { SkipThrottle, Throttle } from '@nestjs/throttler';
 
 @Controller('auth')
 export class AuthController {
@@ -32,6 +33,7 @@ export class AuthController {
     }
 
     @Post('login')
+    @Throttle({ default: { ttl: 60000, limit: 5 } })
     async login(
         @Body() { email, password }: LoginDto,
         @Req() req: Request,
@@ -103,11 +105,13 @@ export class AuthController {
     }
 
     @Post('forgot-password')
+    @Throttle({ default: { ttl: 60000, limit: 5 } })
     async forgotPassword(@Body() dto: ForgotPasswordDto) {
         return await this.service.forgotPassword(dto.email);
     }
 
     @Post('verify-reset-otp')
+    @Throttle({ default: { ttl: 60000, limit: 5 } })
     async verifyResetOtp(@Body() dto: VerifyResetDto) {
         return await this.service.verifyResetOtp(dto.email, dto.otp);
     }
@@ -140,6 +144,7 @@ export class AuthController {
     }
 
     @Post('2fa/verify')
+    @Throttle({ default: { ttl: 60000, limit: 5 } })
     async verify2FA(
         @Body() dto: Verify2FADto,
         @Res({ passthrough: true }) res: Response
@@ -152,10 +157,12 @@ export class AuthController {
     }
 
     @UseGuards(GoogleAuthGuard)
+    @SkipThrottle()
     @Get('google')
     async googleAuth() { }
 
     @UseGuards(GoogleAuthGuard)
+    @SkipThrottle()
     @Get('google/callback')
     async googleAuthRedirect(
         @Req() req: Request,

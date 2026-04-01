@@ -6,6 +6,8 @@ import { envs } from './config';
 import { UsersModule } from './modules/users/users.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { EmailsModule } from './modules/emails/emails.module';
+import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
+import { SubjectModule } from './modules/subject/subject.module';
 
 @Module({
   imports: [
@@ -24,8 +26,21 @@ import { EmailsModule } from './modules/emails/emails.module';
     UsersModule,
     AuthModule,
     EmailsModule,
+    ThrottlerModule.forRoot([
+      {
+        name: 'global',
+        ttl: 6000,
+        limit: 100
+      }
+    ]),
+    SubjectModule
   ],
   controllers: [],
-  providers: [],
+  providers: [
+    {
+      provide: 'APP_GUARD',
+      useClass: ThrottlerGuard
+    }
+  ],
 })
 export class AppModule { }
