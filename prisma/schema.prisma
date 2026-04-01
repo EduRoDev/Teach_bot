@@ -1,0 +1,243 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id Int @id @default(autoincrement())
+
+  name        String?
+  lastName    String?
+  avatar      String?
+  email       String  @unique
+  backupEmail String?
+  phone       String?
+  password    String?
+  country     String? @default("COL")
+  language    String? @default("es-ES")
+
+  emailConfirm       Boolean @default(false)
+  backupEmailConfirm Boolean @default(false)
+  phoneConfirm       Boolean @default(false)
+
+  twoFactorEnabled Boolean @default(false)
+  twoFactorSecret  String?
+
+  sessions Session[]
+
+  status       UserStatusEnum   @default(ACTIVE)
+  authProvider AuthProviderEnum @default(LOCAL)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime? 
+
+  subjects       Subject[]
+  quiz_attempts  QuizAttempt[]
+  chat_histories ChatHistory[]
+  study_plans    CustomStudyPlan[]
+
+  @@index([email])
+  @@index([createdAt])
+  @@map("users")
+}
+
+model Session {
+  id String @id @default(uuid())
+
+  userId Int
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  refreshToken String
+
+  userAgent String?
+  ipAddress String?
+  location  String?
+
+  isActive Boolean @default(true)
+
+  expiresAt  DateTime?
+  createdAt  DateTime  @default(now())
+  lastUsedAt DateTime  @updatedAt
+
+  @@index([userId])
+  @@index([userAgent])
+  @@index([ipAddress])
+}
+
+enum UserStatusEnum {
+  ACTIVE
+  INACTIVE
+  DRAFT
+  BLOCKED
+}
+
+enum AuthProviderEnum {
+  LOCAL
+  GOOGLE
+  FACEBOOK
+  OTHER
+}
+
+model Subject {
+  id          Int    @id @default(autoincrement())
+  name        String
+  description String
+
+  user_id Int?
+  user    User? @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  documents Document[]
+
+  @@map("subject")
+}
+
+model Document {
+  id        Int     @id @default(autoincrement())
+  title     String  @db.VarChar(100)
+  content   String
+  file_path String
+  audio_url String?
+
+  subject_id Int?
+  subject    Subject? @relation(fields: [subject_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  summaries      Summary[]
+  flashcards     Flashcard[]
+  quizzes        Quiz[]
+  chat_histories ChatHistory[]
+  study_plans    CustomStudyPlan[]
+
+  @@map("documents")
+}
+
+model Summary {
+  id      Int    @id @default(autoincrement())
+  content String
+
+  document_id Int?
+  document    Document? @relation(fields: [document_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@map("summary")
+}
+
+model Flashcard {
+  id       Int    @id @default(autoincrement())
+  question String @db.Text
+  answer   String @db.Text
+
+  document_id Int?
+  document    Document? @relation(fields: [document_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@map("flashcards")
+}
+
+model Quiz {
+  id    Int    @id @default(autoincrement())
+  title String @db.VarChar(100)
+
+  document_id Int?
+  document    Document? @relation(fields: [document_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  questions     Question[]
+  quiz_attempts QuizAttempt[]
+
+  @@map("quizzes")
+}
+
+model Question {
+  id             Int    @id @default(autoincrement())
+  question_text  String @db.Text
+  correct_option String
+
+  quiz_id Int?
+  quiz    Quiz? @relation(fields: [quiz_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  options      Option[]
+  quiz_answers QuizAnswer[]
+
+  @@map("questions")
+}
+
+model Option {
+  id          Int    @id @default(autoincrement())
+  option_text String
+
+  question_id Int?
+  question    Question? @relation(fields: [question_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@map("options")
+}
+
+model QuizAttempt {
+  id              Int      @id @default(autoincrement())
+  score           Float
+  total_questions Int
+  correct_answers Int
+  time_taken      Int?
+  completed_at    DateTime @default(now()) @db.Timestamp(6)
+
+  quiz_id Int?
+  quiz    Quiz? @relation(fields: [quiz_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  user_id Int?
+  user    User? @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  answers QuizAnswer[]
+
+  @@map("quiz_attempts")
+}
+
+model QuizAnswer {
+  id              Int     @id @default(autoincrement())
+  selected_option String
+  is_correct      Boolean
+
+  attempt_id Int?
+  attempt    QuizAttempt? @relation(fields: [attempt_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  question_id Int?
+  question    Question? @relation(fields: [question_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@map("quiz_answers")
+}
+
+model ChatHistory {
+  id        Int      @id @default(autoincrement())
+  message   String
+  response  String
+  timestamp DateTime @default(now()) @db.Timestamp(6)
+
+  user_id Int?
+  user    User? @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  document_id Int?
+  document    Document? @relation(fields: [document_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@map("chat_histories")
+}
+
+model CustomStudyPlan {
+  id         Int      @id @default(autoincrement())
+  title      String   @db.VarChar(200)
+  level      String   @db.VarChar(50)
+  content    Json
+  created_at DateTime @default(now()) @db.Timestamp(6)
+  updated_at DateTime @default(now()) @updatedAt @db.Timestamp(6)
+
+  user_id Int?
+  user    User? @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  document_id Int?
+  document    Document? @relation(fields: [document_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@map("custom_study_plans")
+}
