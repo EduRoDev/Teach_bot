@@ -8,6 +8,8 @@ import { AuthModule } from './modules/auth/auth.module';
 import { EmailsModule } from './modules/emails/emails.module';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { SubjectModule } from './modules/subject/subject.module';
+import { GatewayAiModule } from './modules/gateway-ai/gateway-ai.module';
+import { TestModule } from './test/test.module';
 
 @Module({
   imports: [
@@ -33,7 +35,9 @@ import { SubjectModule } from './modules/subject/subject.module';
         limit: 100
       }
     ]),
-    SubjectModule
+    SubjectModule,
+    GatewayAiModule,
+    TestModule
   ],
   controllers: [],
   providers: [

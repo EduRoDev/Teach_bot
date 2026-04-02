@@ -18,6 +18,9 @@ export const envSchema = z
     GOOGLE_CLIENT_ID: z.string().min(1, 'GOOGLE_CLIENT_ID is required.'),
     GOOGLE_CLIENT_SECRET: z.string().min(1, 'GOOGLE_CLIENT_SECRET is required.'),
     GOOGLE_CALLBACK_URL: z.string().min(1, 'GOOGLE_CALLBACK_URL is required.'),
+    GROQ_API_KEY: z.string().min(1, 'GROQ_API_KEY is required.'),
+    CEREBRAS_API_KEY: z.string().min(1, 'CEREBRAS_API_KEY is required.'),
+    GEMINI_API_KEY_TEXT: z.string().min(1, 'GEMINI_API_KEY_TEXT is required')
 
   })
   .passthrough();
@@ -44,6 +47,8 @@ export const envs: envType = {
   GOOGLE_CLIENT_ID: envParsed.data.GOOGLE_CLIENT_ID,
   GOOGLE_CLIENT_SECRET: envParsed.data.GOOGLE_CLIENT_SECRET,
   GOOGLE_CALLBACK_URL: envParsed.data.GOOGLE_CALLBACK_URL,
-
+  GROQ_API_KEY: envParsed.data.GROQ_API_KEY,
+  CEREBRAS_API_KEY: envParsed.data.CEREBRAS_API_KEY,
+  GEMINI_API_KEY_TEXT: envParsed.data.GEMINI_API_KEY_TEXT
 };
 
