@@ -1,7 +1,14 @@
 import { Module } from '@nestjs/common';
-import { DocumentsModule } from './documents/documents.module';
+import { SubjectService } from './subject.service';
+import { SubjectController } from './subject.controller';
+import { PrismaModule } from '../prisma/prisma.module';
 
 @Module({
-  imports: [DocumentsModule]
+  imports: [
+    PrismaModule
+  ],
+  providers: [SubjectService],
+  controllers: [SubjectController],
+  exports: [SubjectService]
 })
-export class SubjectModule {}
+export class SubjectModule { }

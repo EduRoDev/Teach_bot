@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { ForbiddenException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { Response, } from 'express';
 import { cerebrasServices, groqServices, geminiServices } from 'src/common/const';
 import { AIService, ChatMessage } from 'src/common/types/types';
@@ -21,7 +21,7 @@ export class GatewayAiService {
         return service
     }
 
-    async fetch(messages: ChatMessage[], res: Response) {
+    async fetchStream(messages: ChatMessage[], res: Response) {
         const service = this.getNextServices();
         this.logger.log(`Using AI service: ${service.name}`);
         res.setHeader('Content-Type', 'text/event-stream');
@@ -35,5 +35,19 @@ export class GatewayAiService {
         }
 
         res.end();
+    }
+
+    async fetchText(messages: ChatMessage[]): Promise<string> {
+        const service = this.getNextServices();
+        this.logger.log(`Using AI service: ${service.name}`);
+
+        const stream = await service.chat(messages);
+        let result = '';
+
+        for await (const chunk of stream) {
+            result += chunk;
+        }
+
+        return result;
     }
 }

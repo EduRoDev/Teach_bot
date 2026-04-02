@@ -9,6 +9,8 @@ import { EmailsModule } from './modules/emails/emails.module';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { SubjectModule } from './modules/subject/subject.module';
 import { GatewayAiModule } from './modules/gateway-ai/gateway-ai.module';
+import { DocumentsModule } from './modules/documents/documents.module';
+import { SummaryModule } from './modules/summary/summary.module';
 
 @Module({
   imports: [
@@ -36,6 +38,8 @@ import { GatewayAiModule } from './modules/gateway-ai/gateway-ai.module';
     ]),
     SubjectModule,
     GatewayAiModule,
+    DocumentsModule,
+    SummaryModule
   ],
   controllers: [],
   providers: [

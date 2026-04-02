@@ -5,11 +5,12 @@ import { AppModule } from './app.module';
 import { envs } from './config';
 import { Logger, ValidationPipe, VersioningType } from '@nestjs/common';
 import cookieParser from 'cookie-parser';
+import { NestExpressApplication } from '@nestjs/platform-express';
 
 async function bootstrap() {
   const logger = new Logger('App - Leviatan');
 
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
   // app.use(helmet());
   app.use(cookieParser());

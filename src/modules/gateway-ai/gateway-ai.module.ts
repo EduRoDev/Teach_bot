@@ -4,7 +4,10 @@ import { GatewayAiController } from './gateway-ai.controller';
 
 
 @Module({
+  imports: [
+  ],
   providers: [GatewayAiService],
-  controllers: [GatewayAiController]
+  controllers: [GatewayAiController],
+  exports: [GatewayAiService]
 })
 export class GatewayAiModule { }

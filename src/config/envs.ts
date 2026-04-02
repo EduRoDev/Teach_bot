@@ -20,8 +20,14 @@ export const envSchema = z
     GOOGLE_CALLBACK_URL: z.string().min(1, 'GOOGLE_CALLBACK_URL is required.'),
     GROQ_API_KEY: z.string().min(1, 'GROQ_API_KEY is required.'),
     CEREBRAS_API_KEY: z.string().min(1, 'CEREBRAS_API_KEY is required.'),
-    GEMINI_API_KEY_TEXT: z.string().min(1, 'GEMINI_API_KEY_TEXT is required')
-
+    GEMINI_API_KEY_TEXT: z.string().min(1, 'GEMINI_API_KEY_TEXT is required'),
+    GEMINI_API_KEY_VOICE: z.string().min(1, 'GEMINI_API_KEY_VOICE is required.'),
+    GOLANG_SERVICE_URL: z.string().min(1, 'GOLANG_SERVICE_URL is required.'),
+    PYTHON_SERVICE_URL: z.string().min(1, 'PYTHON_SERVICE_URL is required.'),
+    MINIO_ENDPOINT: z.string().min(1, 'MINIO_ENDPOINT is required.'),
+    MINIO_ACCESS_KEY: z.string().min(1, 'MINIO_ACCESS_KEY is required.'),
+    MINIO_SECRET_KEY: z.string().min(1, 'MINIO_SECRET_KEY is required.'),
+    BASE_URL: z.string().min(1, 'BASE_URL is required.'),
   })
   .passthrough();
 
@@ -49,6 +55,14 @@ export const envs: envType = {
   GOOGLE_CALLBACK_URL: envParsed.data.GOOGLE_CALLBACK_URL,
   GROQ_API_KEY: envParsed.data.GROQ_API_KEY,
   CEREBRAS_API_KEY: envParsed.data.CEREBRAS_API_KEY,
-  GEMINI_API_KEY_TEXT: envParsed.data.GEMINI_API_KEY_TEXT
+  GEMINI_API_KEY_TEXT: envParsed.data.GEMINI_API_KEY_TEXT,
+  GEMINI_API_KEY_VOICE: envParsed.data.GEMINI_API_KEY_VOICE,
+  GOLANG_SERVICE_URL: envParsed.data.GOLANG_SERVICE_URL,
+  PYTHON_SERVICE_URL: envParsed.data.PYTHON_SERVICE_URL,
+  MINIO_ENDPOINT: envParsed.data.MINIO_ENDPOINT,
+  MINIO_ACCESS_KEY: envParsed.data.MINIO_ACCESS_KEY,
+  MINIO_SECRET_KEY: envParsed.data.MINIO_SECRET_KEY,
+  BASE_URL: envParsed.data.BASE_URL,
+
 };
 
