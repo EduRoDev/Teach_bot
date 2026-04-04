@@ -12,7 +12,7 @@ import { AuthService } from './auth.service';
 import { UsersModule } from '../users/users.module';
 import { AuthController } from './auth.controller';
 import { PrismaModule } from '../prisma/prisma.module';
-import { EmailsModule } from '../emails/emails.module';
+import { EmailsModule } from '../notifications/emails/emails.module';
 import { jwtFunctions } from 'src/common/class/jwt.class';
 import { GoogleStrategy } from './strategys/google-auth.strategy';
 import { GoogleAuthGuard } from './guards/google.guard';

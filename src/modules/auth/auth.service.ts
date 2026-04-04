@@ -6,10 +6,9 @@ import { JwtService } from '@nestjs/jwt';
 import { envs } from 'src/config';
 import { UsersService } from '../users/users.service';
 import { v4 as uuidv4 } from 'uuid';
-import { EmailsService } from '../emails/emails.service';
+import { EmailsService } from '../notifications/emails/emails.service';
 import { TokensService } from './tokens/tokens.service';
 import { AuthorizationTokenEnum } from 'src/common/enums';
-import { otpTemplate } from '../emails/views/otp.template';
 import { jwtFunctions } from 'src/common/class/jwt.class';
 import { generateSecret, generateURI, verify } from 'otplib';
 import { toDataURL } from 'qrcode';
@@ -51,6 +50,7 @@ export class AuthService {
             expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
         })
 
+        await this.emails.sendWelcome(user.email, user.name ?? 'Usuario');
         return { accessToken, refreshToken, sessionId: session.id }
     }
 
@@ -132,11 +132,7 @@ export class AuthService {
             ttl: 15 * 60 * 1000
         })
 
-        await this.emails.sendEmail({
-            subject: 'Verifica tu correo electrónico',
-            html: otpTemplate(otp.token),
-            to: ['solanoe934@gmail.com']
-        })
+        await this.emails.sendOtp(user.email, otp.token, 'verify_email');
 
         return { message: 'Verification email sent', status: 'success' }
 
@@ -173,11 +169,7 @@ export class AuthService {
             ttl: 15 * 60 * 1000
         })
 
-        await this.emails.sendEmail({
-            to: [email],
-            subject: 'Recuperación de contraseña',
-            html: otpTemplate(otp.token)
-        })
+        await this.emails.sendOtp(user.email, otp.token, 'reset_password');
 
         return { message: 'Recovery email sent', status: 'success' }
     }
@@ -320,6 +312,7 @@ export class AuthService {
             expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
         })
 
+        await this.emails.sendWelcome(user.email, user.name ?? 'Usuario');
         return { accessToken, refreshToken, sessionId: session.id }
     }
 

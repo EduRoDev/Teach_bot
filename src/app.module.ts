@@ -5,14 +5,14 @@ import { PrismaModule } from './modules/prisma/prisma.module';
 import { envs } from './config';
 import { UsersModule } from './modules/users/users.module';
 import { AuthModule } from './modules/auth/auth.module';
-import { EmailsModule } from './modules/emails/emails.module';
+import { EmailsModule } from './modules/notifications/emails/emails.module';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
-import { SubjectModule } from './modules/subject/subject.module';
+import { SubjectModule } from './modules/education/subject/subject.module';
 import { GatewayAiModule } from './modules/gateway-ai/gateway-ai.module';
-import { DocumentsModule } from './modules/documents/documents.module';
-import { SummaryModule } from './modules/summary/summary.module';
-import { FlashcardsModule } from './modules/flashcards/flashcards.module';
-import { QuizModule } from './modules/quiz/quiz.module';
+import { DocumentsModule } from './modules/education/documents/documents.module';
+import { SummaryModule } from './modules/education/summary/summary.module';
+import { FlashcardsModule } from './modules/education/flashcards/flashcards.module';
+import { QuizModule } from './modules/education/quiz/quiz.module';
 
 @Module({
   imports: [
