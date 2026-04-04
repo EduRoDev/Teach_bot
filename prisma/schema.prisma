@@ -38,7 +38,7 @@ model User {
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
-  deletedAt DateTime? 
+  deletedAt DateTime?
 
   subjects       Subject[]
   quiz_attempts  QuizAttempt[]
@@ -212,16 +212,20 @@ model QuizAnswer {
 
 model ChatHistory {
   id        Int      @id @default(autoincrement())
-  message   String
-  response  String
+  message   String   @db.Text  
+  response  String   @db.Text  
   timestamp DateTime @default(now()) @db.Timestamp(6)
 
-  user_id Int?
-  user    User? @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  order     Int      @default(0)
+
+  user_id     Int?
+  user        User?     @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
   document_id Int?
-  document    Document? @relation(fields: [document_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  document    Document? @relation(fields: [document_id], references: [id], onDelete: Cascade)
 
+  @@index([user_id, document_id]) 
+  @@index([timestamp])
   @@map("chat_histories")
 }
 

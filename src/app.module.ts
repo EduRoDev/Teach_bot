@@ -11,6 +11,8 @@ import { SubjectModule } from './modules/subject/subject.module';
 import { GatewayAiModule } from './modules/gateway-ai/gateway-ai.module';
 import { DocumentsModule } from './modules/documents/documents.module';
 import { SummaryModule } from './modules/summary/summary.module';
+import { FlashcardsModule } from './modules/flashcards/flashcards.module';
+import { QuizModule } from './modules/quiz/quiz.module';
 
 @Module({
   imports: [
@@ -39,7 +41,9 @@ import { SummaryModule } from './modules/summary/summary.module';
     SubjectModule,
     GatewayAiModule,
     DocumentsModule,
-    SummaryModule
+    SummaryModule,
+    FlashcardsModule,
+    QuizModule
   ],
   controllers: [],
   providers: [

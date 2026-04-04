@@ -71,7 +71,7 @@ export class SubjectService {
 
     async getDocuments(id: number, userId: number) {
         await this.findOneAndVerify(id, userId)
-        return await this.prisma.subject.findUnique({
+        return await this.prisma.subject.findMany({
             where: { id },
             select: {
                 documents: true
