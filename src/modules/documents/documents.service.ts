@@ -2,6 +2,7 @@ import {
     BadRequestException,
     Injectable,
     InternalServerErrorException,
+    Logger,
     NotFoundException,
     OnModuleInit,
 } from '@nestjs/common';
@@ -13,10 +14,10 @@ import wav from 'wav';
 import { envs } from 'src/config';
 import { PrismaService } from 'src/modules/prisma/prisma.service';
 import { SubjectService } from '../subject/subject.service';
-import type { Request } from 'express';
 import 'multer';
+import { Server } from 'http';
+import e from 'express';
 
-type MulterFile = NonNullable<Request['file']>;
 
 @Injectable()
 export class DocumentsService implements OnModuleInit {
@@ -28,6 +29,7 @@ export class DocumentsService implements OnModuleInit {
     private readonly PYTHON = envs.PYTHON_SERVICE_URL
     private readonly GOLANG = envs.GOLANG_SERVICE_URL
 
+    private logger = new Logger('App - Modules: documents');
     constructor(
         private readonly prisma: PrismaService,
         private readonly subjects: SubjectService,
@@ -37,11 +39,11 @@ export class DocumentsService implements OnModuleInit {
         }
 
         this.s3Client = new S3Client({
-            endpoint: `http://${envs.MINIO_ENDPOINT}`,
+            endpoint: `http://minio-service:9000`,
             region: 'us-east-1',
             credentials: {
-                accessKeyId: envs.MINIO_ACCESS_KEY,
-                secretAccessKey: envs.MINIO_SECRET_KEY,
+                accessKeyId: 'User',
+                secretAccessKey: 'password',
             },
             forcePathStyle: true,
         })
@@ -124,9 +126,10 @@ export class DocumentsService implements OnModuleInit {
                 method: 'POST',
             });
 
-            if (!res.ok) throw new Error(`Go service error: ${res.status}`);
+            if (!res.ok) this.logger.log(`Go service error: ${res.status}`);
         } catch (error: any) {
-            throw new Error(error.message || 'Error converting to PDF');
+
+            throw new InternalServerErrorException(error.message || 'Error converting file to PDF');
         }
     }
 
@@ -135,7 +138,7 @@ export class DocumentsService implements OnModuleInit {
     }
 
     async create(
-        file: MulterFile,
+        file: Express.Multer.File,
         title: string,
         subjectId: number,
         userId: number,
@@ -153,7 +156,8 @@ export class DocumentsService implements OnModuleInit {
                 Body: file.buffer,
                 ContentType: file.mimetype,
             }));
-        } catch {
+        } catch (error: any) {
+            this.logger.error(`Error uploading file to storage: ${error.message}`);
             throw new InternalServerErrorException('Error saving file to storage');
         }
 
@@ -255,7 +259,7 @@ export class DocumentsService implements OnModuleInit {
                 method: 'DELETE',
             });
         } catch (error: any) {
-            console.error('Error deleting from ChromaDB:', error.message);
+            this.logger.error(`Error deleting from ChromaDB: ${error.message}`);
         }
 
         try {
@@ -264,7 +268,7 @@ export class DocumentsService implements OnModuleInit {
                 Key: document.file_path,
             }));
         } catch (error: any) {
-            console.error('Error deleting from storage:', error.message);
+            this.logger.error(`Error deleting from storage: ${error.message}`);
         }
 
         await this.prisma.document.delete({ where: { id } });

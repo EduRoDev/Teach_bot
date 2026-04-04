@@ -1,5 +1,4 @@
-
-
+import 'dotenv/config';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { envs } from './config';
@@ -14,7 +13,6 @@ async function bootstrap() {
 
   // app.use(helmet());
   app.use(cookieParser());
-
 
   app.enableVersioning({
     type: VersioningType.URI,

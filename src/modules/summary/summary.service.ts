@@ -28,7 +28,6 @@ export class SummaryService {
             : document.content;
 
         const response = await this.AiService.fetchText([
-            { role: 'system', content: 'You are a helpful assistant that summarizes documents.' },
             {
                 role: 'user', content: `Resume el siguiente documento en español con un estilo conciso y académico.
                     No uses markdown ni negrillas. Solo texto plano.

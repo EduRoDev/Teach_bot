@@ -12,6 +12,7 @@ import {
     UseGuards,
     UseInterceptors,
     BadRequestException,
+    ParseFilePipe,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import type { Request, Response } from 'express';
@@ -46,7 +47,13 @@ export class DocumentsController {
     create(
         @Req() req: Request,
         @Param('subjectId', ParseIntPipe) subjectId: number,
-        @UploadedFile() file: Express.Multer.File,
+        @UploadedFile(
+            new ParseFilePipe({
+                validators: [],
+                fileIsRequired: true,
+                errorHttpStatusCode: 422,
+            })
+        ) file: Express.Multer.File,
         @Body() dto: CreateDocumentDto,
     ) {
         const { userId } = req.user as { userId: number };
