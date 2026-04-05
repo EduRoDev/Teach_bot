@@ -3,6 +3,7 @@ import { Response, } from 'express';
 import { cerebrasServices, groqServices, geminiServices } from 'src/common/const';
 import { AIService, ChatMessage } from 'src/common/types/types';
 
+
 @Injectable()
 export class GatewayAiService {
     private services: AIService[] = [
@@ -49,5 +50,27 @@ export class GatewayAiService {
         }
 
         return result;
+    }
+
+    async fetchStreamAndCollect(
+        messages: ChatMessage[],
+        res: Response
+    ): Promise<string> {
+        const service = this.getNextServices();
+        this.logger.log(`Using AI service: ${service.name}`);
+        res.setHeader('Content-Type', 'text/event-stream');
+        res.setHeader('Cache-Control', 'no-cache');
+        res.setHeader('Connection', 'keep-alive');
+
+        const stream = await service.chat(messages);
+        let fullResponse = '';
+
+        for await (const chunk of stream) {
+            res.write(chunk);
+            fullResponse += chunk;
+        }
+
+        res.end();
+        return fullResponse;
     }
 }

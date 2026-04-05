@@ -9,16 +9,22 @@ const ai = new GoogleGenAI({
 export const geminiServices: AIService = {
     name: 'Gemini',
     async chat(messages: ChatMessage[]) {
-        const history = messages.slice(0, -1).map(msg => ({
-            role: msg.role === 'assistant' ? 'model' : msg.role,
+        const systemMessage = messages.find(m => m.role === 'system');
+        const conversationMessages = messages.filter(m => m.role !== 'system');
+
+        const history = conversationMessages.slice(0, -1).map(msg => ({
+            role: msg.role === 'assistant' ? 'model' : 'user',
             parts: [{ text: msg.content }]
         }));
 
-        const lastMessage = messages[messages.length - 1].content;
+        const lastMessage = conversationMessages[conversationMessages.length - 1].content;
 
         const chat = ai.chats.create({
             model: 'gemini-2.5-flash',
-            history
+            config: systemMessage ? {
+                systemInstruction: systemMessage.content
+            } : undefined,
+            history,
         });
 
         const stream = await chat.sendMessageStream({ message: lastMessage });

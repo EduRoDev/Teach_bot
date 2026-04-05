@@ -13,6 +13,8 @@ import { DocumentsModule } from './modules/education/documents/documents.module'
 import { SummaryModule } from './modules/education/summary/summary.module';
 import { FlashcardsModule } from './modules/education/flashcards/flashcards.module';
 import { QuizModule } from './modules/education/quiz/quiz.module';
+import { ChatModule } from './modules/education/chat/chat.module';
+import { PlanModule } from './modules/education/plan/plan.module';
 
 @Module({
   imports: [
@@ -43,7 +45,9 @@ import { QuizModule } from './modules/education/quiz/quiz.module';
     DocumentsModule,
     SummaryModule,
     FlashcardsModule,
-    QuizModule
+    QuizModule,
+    ChatModule,
+    PlanModule
   ],
   controllers: [],
   providers: [
