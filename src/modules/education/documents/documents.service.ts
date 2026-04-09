@@ -39,11 +39,11 @@ export class DocumentsService implements OnModuleInit {
         }
 
         this.s3Client = new S3Client({
-            endpoint: `http://localhost:9000`,
+            endpoint: `http://leviatan-minio-service:9000`,
             region: 'us-east-1',
             credentials: {
                 accessKeyId: 'User',
-                secretAccessKey: 'password',
+                secretAccessKey: 'Password',
             },
             forcePathStyle: true,
         })
