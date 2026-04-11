@@ -1,4 +1,4 @@
-import { AuthProviderEnum, UserStatusEnum } from "@prisma/client"
+import { AuthProviderEnum, UserRoleEnum, UserStatusEnum } from "@prisma/client"
 
 
 export interface CreateUserInterface {
@@ -20,6 +20,7 @@ export interface CreateUserInterface {
 
     status?: UserStatusEnum
     authProvider?: AuthProviderEnum
+    role?: UserRoleEnum
 }
 
 export interface UpdateUserInterface {
@@ -42,5 +43,6 @@ export interface UpdateUserInterface {
 
     status?: UserStatusEnum
     authProvider?: AuthProviderEnum
+    role?: UserRoleEnum
 }
 

@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
+import { UserRoleEnum } from '@prisma/client';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { Request } from 'express';
 import { envs } from 'src/config';
@@ -19,11 +20,12 @@ export class RefreshStrategy extends PassportStrategy(Strategy, 'jwt-refresh') {
     }
 
     // req lo tenemos porque pusimos passReqToCallback: true
-    validate(req: Request, payload: { sub: number }) {
+    validate(req: Request, payload: { sub: number; role: UserRoleEnum }) {
         const sessionId = req.cookies?.sessionId;
 
         return {
             userId: payload.sub,
+            role: payload.role,
             sessionId,
         };
     }

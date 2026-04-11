@@ -1,5 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
+import { UserRoleEnum } from "@prisma/client";
 import { envs } from "src/config";
 
 @Injectable()
@@ -8,8 +9,8 @@ export class jwtFunctions {
         private readonly jwt: JwtService
     ) { }
 
-    generateTokens(userId: number) {
-        const payload = { sub: userId }
+    generateTokens(userId: number, role: UserRoleEnum) {
+        const payload = { sub: userId, role }
 
         const accessToken = this.jwt.sign(payload, {
             secret: envs.JWT_SECRET,

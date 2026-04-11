@@ -41,7 +41,8 @@ export class UsersService {
         twoFactorEnabled,
         twoFactorSecret,
         status,
-        authProvider
+        authProvider,
+        role
     }: CreateUserInterface) {
 
         if (!password) {
@@ -67,7 +68,8 @@ export class UsersService {
                 twoFactorEnabled,
                 twoFactorSecret,
                 status,
-                authProvider
+                authProvider,
+                role
             }
         })
 

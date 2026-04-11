@@ -35,6 +35,7 @@ model User {
 
   status       UserStatusEnum   @default(ACTIVE)
   authProvider AuthProviderEnum @default(LOCAL)
+  role         UserRoleEnum     @default(USER)
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
@@ -71,6 +72,11 @@ model Session {
   @@index([userId])
   @@index([userAgent])
   @@index([ipAddress])
+}
+
+enum UserRoleEnum {
+  USER
+  ADMIN
 }
 
 enum UserStatusEnum {

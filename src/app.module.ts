@@ -15,6 +15,7 @@ import { FlashcardsModule } from './modules/education/flashcards/flashcards.modu
 import { QuizModule } from './modules/education/quiz/quiz.module';
 import { ChatModule } from './modules/education/chat/chat.module';
 import { PlanModule } from './modules/education/plan/plan.module';
+import { AdminModule } from './modules/admin/admin.module';
 
 @Module({
   imports: [
@@ -47,7 +48,8 @@ import { PlanModule } from './modules/education/plan/plan.module';
     FlashcardsModule,
     QuizModule,
     ChatModule,
-    PlanModule
+    PlanModule,
+    AdminModule
   ],
   controllers: [],
   providers: [

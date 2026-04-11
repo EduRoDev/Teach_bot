@@ -13,6 +13,9 @@ import { LoginDto } from './dto/login.dto';
 import { Verify2FADto } from './dto/verify-2fa.dto';
 import { GoogleAuthGuard } from './guards/google.guard';
 import { SkipThrottle, Throttle } from '@nestjs/throttler';
+import { RolesGuard } from './guards/roles.guard';
+import { Roles } from './decorators/roles.decorator';
+import { UserRoleEnum } from '@prisma/client';
 
 @Controller('auth')
 export class AuthController {
@@ -179,5 +182,12 @@ export class AuthController {
         setSessionCookie(res, sessionId)
         return { accessToken }
         // return res.redirect(`${envs.CLIENT_URL}?accessToken=${accessToken}`)
+    }
+
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles(UserRoleEnum.ADMIN)
+    @Get('admin/ping')
+    adminPing() {
+        return { message: 'Admin access granted' }
     }
 }

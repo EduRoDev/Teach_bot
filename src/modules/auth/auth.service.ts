@@ -37,7 +37,7 @@ export class AuthService {
             password
         })
 
-        const { accessToken, refreshToken } = this.jwtFunctions.generateTokens(user.id);
+        const { accessToken, refreshToken } = this.jwtFunctions.generateTokens(user.id, user.role);
 
         const hashedRefreshToken = await this.bcrypt.hash(refreshToken);
 
@@ -74,7 +74,7 @@ export class AuthService {
             return { tempToken, twoFactorRequired: true }
         }
 
-        const { accessToken, refreshToken } = this.jwtFunctions.generateTokens(user.id);
+        const { accessToken, refreshToken } = this.jwtFunctions.generateTokens(user.id, user.role);
 
         const hashedRefreshToken = await this.bcrypt.hash(refreshToken);
 
@@ -102,7 +102,8 @@ export class AuthService {
         const refreshTokenValid = await this.bcrypt.compare(refreshToken, session.refreshToken)
         if (!refreshTokenValid) throw new UnauthorizedException('Invalid refresh token')
 
-        const { accessToken, refreshToken: newRefreshToken } = this.jwtFunctions.generateTokens(userId)
+        const user = await this.users.findOne(userId)
+        const { accessToken, refreshToken: newRefreshToken } = this.jwtFunctions.generateTokens(userId, user.role)
 
         const hashedRefreshToken = await this.bcrypt.hash(newRefreshToken)
 
@@ -262,7 +263,7 @@ export class AuthService {
 
         if (!isValid) throw new UnauthorizedException('Invalid 2FA code')
 
-        const { accessToken, refreshToken } = this.jwtFunctions.generateTokens(user.id);
+        const { accessToken, refreshToken } = this.jwtFunctions.generateTokens(user.id, user.role);
         const hashedRefreshToken = await this.bcrypt.hash(refreshToken);
         const session = await this.sessions.create({
             id: uuidv4(),
@@ -303,7 +304,7 @@ export class AuthService {
 
         if (user.status !== UserStatusEnum.ACTIVE) throw new UnauthorizedException('User is not active')
 
-        const { accessToken, refreshToken } = this.jwtFunctions.generateTokens(user.id);
+        const { accessToken, refreshToken } = this.jwtFunctions.generateTokens(user.id, user.role);
         const hashedRefreshToken = await this.bcrypt.hash(refreshToken);
         const session = await this.sessions.create({
             id: uuidv4(),

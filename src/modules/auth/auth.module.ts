@@ -16,6 +16,7 @@ import { EmailsModule } from '../notifications/emails/emails.module';
 import { jwtFunctions } from 'src/common/class/jwt.class';
 import { GoogleStrategy } from './strategys/google-auth.strategy';
 import { GoogleAuthGuard } from './guards/google.guard';
+import { RolesGuard } from './guards/roles.guard';
 
 @Module({
   imports: [
@@ -37,13 +38,15 @@ import { GoogleAuthGuard } from './guards/google.guard';
     AuthService,
     jwtFunctions,
     GoogleStrategy,
-    GoogleAuthGuard
+    GoogleAuthGuard,
+    RolesGuard
   ],
 
   exports: [
     JwtAuthGuard,
     RefreshGuard,
-    JwtModule
+    JwtModule,
+    RolesGuard
   ],
 
   controllers: [AuthController]

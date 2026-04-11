@@ -1,98 +1,536 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# Leviatan v3 Backend
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+Backend API para la plataforma educativa Leviatan.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+Implementado con NestJS, Prisma y PostgreSQL, con autenticacion JWT, sesiones con refresh token por cookies, IA para chat/contenido y un modulo administrativo protegido por rol.
 
-## Description
+## Stack
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+- Node.js 22
+- NestJS 11
+- Prisma 7 + PostgreSQL
+- Redis (cache y tokens OTP)
+- JWT + Passport
+- MinIO/S3 para archivos
+- Servicios externos de IA (Gemini, Groq, Cerebras, Python service y Go service)
 
-## Project setup
+## Versionado y base URL
 
-```bash
-$ npm install
+- El API usa versionado por URI.
+- Prefijo real de rutas: `/v1`.
+- Ejemplo local: `http://localhost:3000/v1/auth/login`.
+
+## Modulos principales
+
+- `auth`: registro, login, refresh, logout, 2FA, Google OAuth, recovery.
+- `admin`: endpoints administrativos (solo `ADMIN`).
+- `education/subject`: materias del usuario.
+- `education/documents`: documentos por materia, lectura de archivo y audio.
+- `education/summary`: resumen por documento.
+- `education/flashcards`: flashcards por documento.
+- `education/quiz`: quiz por documento y estadisticas de intentos.
+- `education/chat`: chat contextual por documento (normal y stream).
+- `education/plan`: plan de estudio por documento.
+- `gateway-ai`: streaming de chat general de IA.
+- `notifications/emails`: envio de correos (bienvenida, OTP, etc).
+
+## Requisitos
+
+- Node.js `>= 22`
+- npm `>= 10`
+- PostgreSQL disponible
+- Redis disponible
+- Variables de entorno completas
+
+## Variables de entorno requeridas
+
+El backend valida variables con Zod al arrancar. Si falta una, la app no inicia.
+
+```env
+PORT=3000
+ALLOWED_ORIGINS=http://localhost:5173,http://localhost:3001
+
+DATABASE_URL=postgresql://user:password@localhost:5434/teach_bot
+REDIS_URL=redis://localhost:6379
+
+RESEND_API_KEY=...
+RESEND_FROM_EMAIL=...
+
+JWT_SECRET=...
+JWT_REFRESH_SECRET=...
+JWT_RESET_SECRET=...
+
+GOOGLE_CLIENT_ID=...
+GOOGLE_CLIENT_SECRET=...
+GOOGLE_CALLBACK_URL=http://localhost:3000/v1/auth/google/callback
+
+GROQ_API_KEY=...
+CEREBRAS_API_KEY=...
+GEMINI_API_KEY_TEXT=...
+GEMINI_API_KEY_VOICE=...
+
+GOLANG_SERVICE_URL=http://localhost:8080
+PYTHON_SERVICE_URL=http://localhost:8000
+
+MINIO_ENDPOINT=http://localhost:9000
+MINIO_ACCESS_KEY=...
+MINIO_SECRET_KEY=...
+
+BASE_URL=http://localhost:3000/v1
 ```
 
-## Compile and run the project
+## Instalacion y ejecucion local
+
+1. Instalar dependencias.
 
 ```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+npm install
 ```
 
-## Run tests
+2. Generar cliente Prisma.
 
 ```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+npx prisma generate
 ```
 
-## Deployment
-
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+3. Aplicar migraciones en local.
 
 ```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+npx prisma migrate dev
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+4. Ejecutar en desarrollo.
 
-## Resources
+```bash
+npm run start:dev
+```
 
-Check out a few resources that may come in handy when working with NestJS:
+## Build y produccion
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+```bash
+npm run build
+npm run start:prod
+```
 
-## Support
+## Docker
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+Este proyecto incluye `Dockerfile` multi-stage y `start.sh`.
 
-## Stay in touch
+- En runtime se ejecuta `prisma migrate deploy`.
+- Luego arranca con `node dist/src/main`.
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+## Prisma y modelo de datos
 
-## License
+Entidad principal:
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+- `User` con soporte de roles (`USER`, `ADMIN`), estado (`ACTIVE`, `INACTIVE`, `DRAFT`, `BLOCKED`) y proveedor auth (`LOCAL`, `GOOGLE`, etc).
+- `Session` para refresh token por dispositivo/sesion.
+- `Subject` y `Document` como base de contenido.
+- `Summary`, `Flashcard`, `Quiz`, `QuizAttempt`, `QuizAnswer`, `ChatHistory`, `CustomStudyPlan`.
+
+Archivo de esquema: `prisma/schema.prisma`.
+
+## Autenticacion y sesiones
+
+Flujo actual:
+
+- Access token por `Bearer`.
+- Refresh token por cookie `httpOnly` (`refreshToken`).
+- Session id por cookie `httpOnly` (`sessionId`).
+- JWT payload incluye `sub` y `role`.
+- Guard de rol habilitado via `RolesGuard` + `@Roles(...)`.
+
+Notas:
+
+- En desarrollo, cookies estan configuradas con `secure: false` y `sameSite: lax`.
+- En produccion, ajustar politica de cookies segun dominio/HTTPS.
+
+## Rutas API (resumen)
+
+Todas con prefijo `/v1`.
+
+### Auth
+
+- `POST /auth/register`
+- `POST /auth/login`
+- `POST /auth/refresh`
+- `POST /auth/Logout`
+- `POST /auth/send-verify-email`
+- `POST /auth/verify-email`
+- `POST /auth/forgot-password`
+- `POST /auth/verify-reset-otp`
+- `PUT /auth/reset-password`
+- `POST /auth/2fa/generate`
+- `POST /auth/2fa/enable`
+- `POST /auth/2fa/verify`
+- `GET /auth/google`
+- `GET /auth/google/callback`
+- `GET /auth/admin/ping` (solo `ADMIN`)
+
+### Admin (solo ADMIN)
+
+- `GET /admin/overview`
+- `GET /admin/users?page=1&limit=10&search=`
+- `GET /admin/subjects?page=1&limit=10&search=`
+- `GET /admin/documents?page=1&limit=10&search=`
+
+### Subject
+
+- `POST /subject`
+- `GET /subject`
+- `GET /subject/:id`
+- `GET /subject/:id/documents`
+- `PATCH /subject/:id`
+- `DELETE /subject/:id`
+
+### Documents
+
+- `POST /documents/:subjectId` (multipart/form-data con `file`)
+- `GET /documents/:id`
+- `GET /documents/:id/file`
+- `DELETE /documents/:id`
+- `POST /documents/:id/audio`
+
+### Summary
+
+- `POST /summary/:documentId`
+- `GET /summary/:documentId`
+
+### Flashcards
+
+- `POST /flashcards/generate/:documentId`
+- `GET /flashcards/:documentId`
+- `DELETE /flashcards/:id`
+
+### Quiz
+
+- `POST /quiz/:documentId/generate`
+- `GET /quiz/:documentId`
+- `POST /quiz/:id/attempt`
+- `GET /quiz/:id/attempts`
+
+### Chat
+
+- `GET /chat/:documentId`
+- `POST /chat/:documentId`
+- `POST /chat/:documentId/stream`
+
+### Plan
+
+- `POST /plan/:documentId`
+- `GET /plan/:documentId`
+- `DELETE /plan/:id`
+
+### AI Gateway
+
+- `POST /ai/chat` (streaming)
+
+## Pruebas de endpoints
+
+Esta seccion sirve como guia rapida para QA manual en local o en ambiente desplegado.
+
+### Variables recomendadas en Postman
+
+Crear un Environment con estas variables:
+
+- `baseUrl`: `http://localhost:3000/v1`
+- `accessToken`: se llena despues de login
+- `subjectId`: id de materia para pruebas
+- `documentId`: id de documento para pruebas
+- `quizId`: id de quiz para pruebas
+
+Header comun para endpoints protegidos:
+
+- `Authorization: Bearer {{accessToken}}`
+
+### Flujo minimo de smoke test
+
+1. Health funcional basico:
+	 - `POST /auth/register` o `POST /auth/login` debe responder sin error.
+2. Autenticacion:
+	 - Guardar `accessToken` de login en variable.
+3. CRUD base de estudio:
+	 - Crear materia.
+	 - Crear documento asociado a la materia.
+4. Generacion de contenido:
+	 - Resumen, flashcards y quiz sobre el documento.
+5. Admin:
+	 - Con usuario normal, `GET /admin/overview` debe devolver `403`.
+	 - Con usuario ADMIN, `GET /admin/overview` debe devolver `200`.
+
+### Ejemplos en formato JSON
+
+#### 1) Register
+
+```json
+{
+	"name": "Register",
+	"request": {
+		"method": "POST",
+		"url": "{{baseUrl}}/auth/register",
+		"headers": {
+			"Content-Type": "application/json"
+		},
+		"body": {
+			"name": "John",
+			"lastName": "Doe",
+			"email": "john@example.com",
+			"password": "StrongPass123"
+		}
+	},
+	"expected": {
+		"status": 201,
+		"body": {
+			"accessToken": "<jwt>"
+		}
+	}
+}
+```
+
+#### 2) Login
+
+```json
+{
+	"name": "Login",
+	"request": {
+		"method": "POST",
+		"url": "{{baseUrl}}/auth/login",
+		"headers": {
+			"Content-Type": "application/json"
+		},
+		"body": {
+			"email": "john@example.com",
+			"password": "StrongPass123"
+		}
+	},
+	"expected": {
+		"status": 201,
+		"body": {
+			"accessToken": "<jwt>"
+		},
+		"cookies": ["refreshToken", "sessionId"]
+	}
+}
+```
+
+#### 3) Listar materias con token
+
+```json
+{
+	"name": "Get Subjects",
+	"request": {
+		"method": "GET",
+		"url": "{{baseUrl}}/subject",
+		"headers": {
+			"Authorization": "Bearer {{accessToken}}"
+		}
+	},
+	"expected": {
+		"status": 200,
+		"bodyType": "array"
+	}
+}
+```
+
+#### 4) Crear materia
+
+```json
+{
+	"name": "Create Subject",
+	"request": {
+		"method": "POST",
+		"url": "{{baseUrl}}/subject",
+		"headers": {
+			"Authorization": "Bearer {{accessToken}}",
+			"Content-Type": "application/json"
+		},
+		"body": {
+			"name": "Matematicas",
+			"description": "Materia de prueba"
+		}
+	},
+	"expected": {
+		"status": 201,
+		"save": {
+			"subjectId": "response.id"
+		}
+	}
+}
+```
+
+#### 5) Crear documento
+
+```json
+{
+	"name": "Create Document",
+	"request": {
+		"method": "POST",
+		"url": "{{baseUrl}}/documents/{{subjectId}}",
+		"headers": {
+			"Authorization": "Bearer {{accessToken}}"
+		},
+		"bodyType": "form-data",
+		"formData": {
+			"title": "Documento de prueba",
+			"file": "./archivo.pdf"
+		}
+	},
+	"expected": {
+		"status": 201,
+		"body": {
+			"message": "Document created successfully",
+			"document": {
+				"id": "<number>",
+				"title": "Documento de prueba"
+			}
+		},
+		"save": {
+			"documentId": "response.document.id"
+		}
+	}
+}
+```
+
+#### 6) Generar resumen
+
+```json
+{
+	"name": "Generate Summary",
+	"request": {
+		"method": "POST",
+		"url": "{{baseUrl}}/summary/{{documentId}}",
+		"headers": {
+			"Authorization": "Bearer {{accessToken}}"
+		}
+	},
+	"expected": {
+		"status": 201
+	}
+}
+```
+
+#### 7) Generar quiz y enviar intento
+
+```json
+{
+	"name": "Generate Quiz",
+	"request": {
+		"method": "POST",
+		"url": "{{baseUrl}}/quiz/{{documentId}}/generate",
+		"headers": {
+			"Authorization": "Bearer {{accessToken}}"
+		}
+	},
+	"expected": {
+		"status": 201,
+		"save": {
+			"quizId": "response.id"
+		}
+	}
+}
+```
+
+```json
+{
+	"name": "Submit Quiz Attempt",
+	"request": {
+		"method": "POST",
+		"url": "{{baseUrl}}/quiz/{{quizId}}/attempt",
+		"headers": {
+			"Authorization": "Bearer {{accessToken}}",
+			"Content-Type": "application/json"
+		},
+		"body": {
+			"answers": [
+				{
+					"questionId": 1,
+					"selectedOption": "A"
+				}
+			],
+			"timeTaken": 120
+		}
+	},
+	"expected": {
+		"status": 201
+	}
+}
+```
+
+#### 8) Validar acceso admin
+
+Usuario normal (debe fallar):
+
+```json
+{
+	"name": "Admin Overview With USER",
+	"request": {
+		"method": "GET",
+		"url": "{{baseUrl}}/admin/overview",
+		"headers": {
+			"Authorization": "Bearer {{userToken}}"
+		}
+	},
+	"expected": {
+		"status": 403
+	}
+}
+```
+
+Usuario admin (debe pasar):
+
+```json
+{
+	"name": "Admin Overview With ADMIN",
+	"request": {
+		"method": "GET",
+		"url": "{{baseUrl}}/admin/overview",
+		"headers": {
+			"Authorization": "Bearer {{adminToken}}"
+		}
+	},
+	"expected": {
+		"status": 200
+	}
+}
+```
+
+### Casos esperados por endpoint
+
+- `401 Unauthorized`: token ausente/invalido/expirado.
+- `403 Forbidden`: usuario autenticado sin permisos de rol.
+- `404 Not Found`: ids inexistentes (materia/documento/quiz).
+- `422 Unprocessable Entity`: validacion de archivo o body invalido.
+
+### Recomendacion para equipo
+
+- Mantener una coleccion de Postman con carpetas por modulo: `auth`, `admin`, `subject`, `documents`, `summary`, `flashcards`, `quiz`, `chat`, `plan`.
+- Agregar tests basicos en Postman para status code y estructura minima de respuesta.
+- Versionar la coleccion en el repositorio para evitar divergencias entre entornos.
+
+## Convenciones importantes del proyecto
+
+- Respuestas historicas no siempre vienen envueltas en `{ data: ... }`; algunos endpoints retornan arrays directos.
+- En submit de quiz statistics, enviar solo `answers` y `timeTaken` en body para el endpoint de intento.
+- Varios endpoints dependen de `req.user.userId` inyectado por JWT strategy.
+
+## Scripts utiles
+
+```bash
+npm run start:dev
+npm run build
+npm run start:prod
+npm run lint
+npm run test
+```
+
+## Checklist rapido para nuevos devs
+
+1. Clonar repo.
+2. Crear `.env` con todas las variables.
+3. Levantar PostgreSQL + Redis + servicios auxiliares.
+4. `npm install`.
+5. `npx prisma migrate dev`.
+6. `npm run start:dev`.
+7. Probar `POST /v1/auth/login`.
+8. Para admin endpoints, usar usuario con rol `ADMIN`.
+
