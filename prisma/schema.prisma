@@ -45,6 +45,8 @@ model User {
   quiz_attempts  QuizAttempt[]
   chat_histories ChatHistory[]
   study_plans    CustomStudyPlan[]
+  videos         Video[]
+  video_chats    VideoChat[]
 
   @@index([email])
   @@index([createdAt])
@@ -102,6 +104,7 @@ model Subject {
   user    User? @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   documents Document[]
+  videos    Video[]
 
   @@map("subject")
 }
@@ -218,19 +221,19 @@ model QuizAnswer {
 
 model ChatHistory {
   id        Int      @id @default(autoincrement())
-  message   String   @db.Text  
-  response  String   @db.Text  
+  message   String   @db.Text
+  response  String   @db.Text
   timestamp DateTime @default(now()) @db.Timestamp(6)
 
-  order     Int      @default(0)
+  order Int @default(0)
 
-  user_id     Int?
-  user        User?     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  user_id Int?
+  user    User? @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
   document_id Int?
   document    Document? @relation(fields: [document_id], references: [id], onDelete: Cascade)
 
-  @@index([user_id, document_id]) 
+  @@index([user_id, document_id])
   @@index([timestamp])
   @@map("chat_histories")
 }
@@ -250,4 +253,65 @@ model CustomStudyPlan {
   document    Document? @relation(fields: [document_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@map("custom_study_plans")
+}
+
+enum VideoSourceEnum {
+  YOUTUBE
+  FILE
+}
+
+enum VideoStatusEnum {
+  PENDING
+  PROCESSING
+  READY
+  FAILED
+}
+
+model Video {
+  id          Int             @id @default(autoincrement())
+  title       String          @db.VarChar(200)
+  source      VideoSourceEnum
+  status      VideoStatusEnum @default(PENDING)
+  youtube_url String?
+  file_path   String?
+
+  duration_seconds Int?
+  error_message    String?
+
+  user_id Int?
+  user    User? @relation(fields: [user_id], references: [id])
+
+  subject_id Int?
+  subject    Subject? @relation(fields: [subject_id], references: [id])
+
+  created_at DateTime  @default(now())
+  updated_at DateTime  @default(now()) @updatedAt
+  deleted_at DateTime?
+
+  chat_histories VideoChat[]
+
+  @@index([user_id])
+  @@index([subject_id])
+  @@map("videos")
+}
+
+model VideoChat {
+  id Int @id @default(autoincrement())
+
+  message   String   @db.Text
+  response  String   @db.Text
+  timestamp DateTime @default(now()) @db.Timestamp(6)
+  order Int @default(0)
+
+
+  video_id Int?
+  video    Video? @relation(fields: [video_id], references: [id])
+
+  user_id Int?
+  user    User? @relation(fields: [user_id], references: [id])
+
+  @@index([video_id])
+  @@index([user_id, video_id])
+  @@index([timestamp])
+  @@map("video_chats")
 }
