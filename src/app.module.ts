@@ -16,6 +16,7 @@ import { QuizModule } from './modules/education/quiz/quiz.module';
 import { ChatModule } from './modules/education/chat/chat.module';
 import { PlanModule } from './modules/education/plan/plan.module';
 import { AdminModule } from './modules/admin/admin.module';
+import { VideosModule } from './modules/education/videos/videos.module';
 
 @Module({
   imports: [
@@ -49,7 +50,8 @@ import { AdminModule } from './modules/admin/admin.module';
     QuizModule,
     ChatModule,
     PlanModule,
-    AdminModule
+    AdminModule,
+    VideosModule
   ],
   controllers: [],
   providers: [
