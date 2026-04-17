@@ -190,4 +190,11 @@ export class AuthController {
     adminPing() {
         return { message: 'Admin access granted' }
     }
+
+    @Get("user")
+    @UseGuards(JwtAuthGuard)
+    getUser(@Req() req: Request){
+        const { userId } = req.user as { userId: number };
+        return this.service.getUser(userId);
+    }
 }

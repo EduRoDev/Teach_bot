@@ -12,7 +12,19 @@ import { AuthorizationTokenEnum } from 'src/common/enums';
 import { jwtFunctions } from 'src/common/class/jwt.class';
 import { generateSecret, generateURI, verify } from 'otplib';
 import { toDataURL } from 'qrcode';
-import { AuthProviderEnum, UserStatusEnum } from '@prisma/client';
+import { AuthProviderEnum, Prisma, UserStatusEnum } from '@prisma/client';
+
+
+const publicUserSelect = Prisma.validator<Prisma.UserSelect>()({
+    id: true,
+    name: true,
+    lastName: true,
+    avatar: true,
+    email: true,
+    phone: true,
+    country: true,
+    language: true,
+});
 
 
 @Injectable()
@@ -50,7 +62,7 @@ export class AuthService {
             expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
         })
 
-        await this.emails.sendWelcome(user.email, user.name ?? 'Usuario');
+        //await this.emails.sendWelcome(user.email, user.name ?? 'Usuario');
         return { accessToken, refreshToken, sessionId: session.id }
     }
 
@@ -159,6 +171,17 @@ export class AuthService {
         return { message: 'Email verified successfully', status: 'success' }
     }
 
+    async getUser(userId: number) {
+        const user = await this.prisma.user.findUnique({
+            where: { id: userId },
+            select: publicUserSelect
+        })
+
+        return {
+            message: 'User Data',
+            data: user
+        }
+    }
 
     async forgotPassword(email: string) {
         const user = await this.users.findOne(undefined, email)
