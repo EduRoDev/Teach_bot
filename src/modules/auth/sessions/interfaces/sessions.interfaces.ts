@@ -32,7 +32,7 @@ export interface GetAllSessions {
 }
 
 export interface GetSession {
-    id: string
+    id?: string
     userId: number
 }
 

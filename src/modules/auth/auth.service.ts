@@ -12,7 +12,7 @@ import { AuthorizationTokenEnum } from 'src/common/enums';
 import { jwtFunctions } from 'src/common/class/jwt.class';
 import { generateSecret, generateURI, verify } from 'otplib';
 import { toDataURL } from 'qrcode';
-import { AuthProviderEnum, Prisma, UserStatusEnum } from '@prisma/client';
+import { AuthProviderEnum, Prisma, Session, UserStatusEnum } from '@prisma/client';
 
 
 const publicUserSelect = Prisma.validator<Prisma.UserSelect>()({
@@ -90,14 +90,28 @@ export class AuthService {
 
         const hashedRefreshToken = await this.bcrypt.hash(refreshToken);
 
-        const session = await this.sessions.create({
-            id: uuidv4(),
-            userId: user.id,
-            refreshToken: hashedRefreshToken,
-            userAgent,
-            ipAddress,
-            expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
-        })
+        const findSession = await this.sessions.findOne({ userId: user.id})
+        let session: Session
+        
+        if (findSession) {
+            session = await this.sessions.update({
+                id: findSession.id,
+                userId: user.id,
+                refreshToken: hashedRefreshToken,
+                userAgent,
+                ipAddress,
+                expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
+            })
+        } else {
+            session = await this.sessions.create({
+                id: uuidv4(),
+                userId: user.id,
+                refreshToken: hashedRefreshToken,
+                userAgent,
+                ipAddress,
+                expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
+            })
+        }
 
         return { accessToken, refreshToken, sessionId: session.id }
     }
@@ -130,7 +144,7 @@ export class AuthService {
     }
 
     async logout(userId: number, sessionId: string) {
-        await this.sessions.delete({ id: sessionId, userId })
+        await this.sessions.delete({ id: sessionId, userId})
         return { message: 'Logged out successfully' }
     }
 

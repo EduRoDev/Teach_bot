@@ -87,8 +87,8 @@ export class SessionsService {
         })
     }
 
-    async delete({ id, userId }: GetSession) {
-        await this.findOne({ id, userId })
+    async delete({ id, userId}: GetSession) {
+        await this.findOne({ id, userId})
         return await this.prisma.session.delete({
             where: {
                 id, userId
